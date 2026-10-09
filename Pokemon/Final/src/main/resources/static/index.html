@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pokédex Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:'Poppins',sans-serif;
+    }
+
+    body{
+      background:#f4f6fb;
+      color:#1f2937;
+      overflow-x: hidden;
+    }
+
+    /* WELCOME/HOME PAGE ANIMATED VIEW */
+    .welcome-view {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #FFF5F6 0%, #FFD6DD 100%);
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.6s ease;
+    }
+
+    .welcome-view.hidden {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Floating Pokéball Graphic Background Effect */
+    .welcome-bg-icon {
+      position: absolute;
+      font-size: 26rem;
+      color: rgba(255, 52, 52, 0.089);
+      z-index: 1;
+      animation: floatAnimation 6s ease-in-out infinite;
+    }
+
+    .welcome-content {
+      position: relative;
+      z-index: 2;
+      max-width: 600px;
+      animation: fadeInUp 1s ease forwards;
+    }
+
+    .welcome-content i.main-poke-icon {
+      font-size: 80px;
+      color: #FF0D2A;
+      margin-bottom: 20px;
+      display: inline-block;
+      filter: drop-shadow(0 0 15px rgba(255, 46, 46, 0.4));
+      animation: pulseGlow 2s infinite alternate;
+    }
+
+    .welcome-title {
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #FF1735, #FF1735);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .welcome-subtitle {
+      font-size: 18px;
+      color: #6B7280;
+      margin-bottom: 40px;
+      font-weight: 300;
+    }
+
+    .enter-btn {
+      background: linear-gradient(135deg, #ff2e2e, #e60023);
+      color: #fff;
+      border: none;
+      padding: 16px 40px;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(230, 0, 35, 0.3);
+      transition: 0.3s all ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .enter-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(230, 0, 35, 0.5);
+      background: linear-gradient(135deg, #ff4545, #ff1a3d);
+    }
+
+    .enter-btn i {
+      transition: transform 0.3s ease;
+    }
+
+    .enter-btn:hover i {
+      transform: translateX(5px);
+    }
+
+    /* ANIMATIONS KEYFRAMES */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes floatAnimation {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(10deg); }
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255, 46, 46, 0.3)); }
+      100% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(255, 46, 46, 0.7)); }
+    }
+
+
+    /* NAVBAR & HOME ICON INTEGRATION */
+    .navbar{
+      width:100%;
+      background:linear-gradient(135deg,#ff2e2e,#e60023);
+      padding:20px 60px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      box-shadow:0 4px 15px rgba(0,0,0,0.15);
+      position:sticky;
+      top:0;
+      z-index:100;
+      gap: 20px;
+    }
+
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      color:#fff;
+      white-space: nowrap;
+    }
+
+    .logo-link-home {
+      color: #fff;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .logo-link-home:hover {
+      opacity: 0.85;
+    }
+
+    .logo i{
+      font-size:32px;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .logo-main {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .logo-sub {
+      font-size: 14px;
+      font-weight: 400;
+      opacity: 0.9;
+    }
+
+    /* SEARCH FILTER STYLES */
+    .search-container {
+      flex: 1;
+      max-width: 400px;
+      position: relative;
+      margin: 0 10px 0 20px;
+    }
+
+    .search-container input {
+      width: 100%;
+      padding: 12px 20px 12px 45px;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    .search-container input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .search-container input:focus {
+      background: #fff;
+      color: #1f2937;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .search-container input:focus::placeholder {
+      color: #777;
+    }
+
+    .search-container i {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.7);
+      transition: 0.3s;
+    }
+
+    .search-container input:focus + i {
+      color: #e60023;
+    }
+
+    /* TYPE FILTER STYLES */
+    .filter-container {
+      max-width: 180px;
+    }
+
+    .filter-container select {
+      width: 100%;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      outline: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .filter-container select option {
+      color: #1f2937;
+      background: #fff;
+    }
+
+    .filter-container select:focus {
+      background: #fff;
+      color: #1f2937;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .add-btn{
+      background:#fff;
+      color:#e60023;
+      border:none;
+      padding:14px 24px;
+      border-radius:14px;
+      font-size:16px;
+      font-weight:600;
+      cursor:pointer;
+      transition:0.3s;
+      white-space: nowrap;
+    }
+
+    .add-btn:hover{
+      transform:translateY(-2px);
+      background:#ffe8e8;
+    }
+
+    /* DASHBOARD LAYOUT container */
+    .container{
+      width:90%;
+      margin:auto;
+      padding:40px 0;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:25px;
+      margin-bottom:40px;
+    }
+
+    .stat-card{
+      background:#fff;
+      border-radius:24px;
+      padding:25px;
+      display:flex;
+      align-items:center;
+      gap:20px;
+      box-shadow:0 5px 15px rgba(0,0,0,0.06);
+      transition:0.3s;
+    }
+
+    .stat-card:hover{
+      transform:translateY(-5px);
+    }
+
+    .icon-box{
+      width:70px;
+      height:70px;
+      border-radius:20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:28px;
+      color:#fff;
+    }
+
+    .blue{ background:#4f8cff; }
+    .green{ background:#38c172; }
+    .yellow{ background:#ffb300; }
+    .red{ background:#ff4d4d; }
+    .cyan{ background:#26c6da; }
+
+    .stat-text h2{ font-size:30px; }
+    .stat-text p{ color:#777; }
+
+    /* POKEMON GRID */
+    .pokemon-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      gap:30px;
+    }
+
+    .pokemon-card{
+      background:#fff;
+      border-radius:28px;
+      overflow:hidden;
+      box-shadow:0 10px 25px rgba(0,0,0,0.08);
+      transition:0.3s;
+      position:relative;
+    }
+
+    .pokemon-card:hover{
+      transform:translateY(-8px);
+    }
+
+    .card-top{
+      height:180px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:90px;
+      color:rgba(255,255,255,0.9);
+    }
+
+    .electric{ background:linear-gradient(135deg,#ffe600,#ffb300); }
+    .water{ background:linear-gradient(135deg,#3b82f6,#2563eb); }
+    .fire{ background:linear-gradient(135deg,#ff6b6b,#ff2e63); }
+    .grass{ background:linear-gradient(135deg,#22c55e,#16a34a); }
+
+    .card-body{ padding:25px; }
+
+    .pokemon-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:10px;
+    }
+
+    .pokemon-name{
+      font-size:28px;
+      font-weight:700;
+    }
+
+    .type-badge{
+      padding:8px 14px;
+      border-radius:50px;
+      font-size:13px;
+      font-weight:600;
+      background:#f1f5f9;
+      color:#444;
+    }
+
+    .id-badge {
+      font-size: 14px;
+      color: #9ca3af;
+      font-weight: 600;
+      margin-bottom: 2px;
+      display: block;
+    }
+
+    .hp{
+      margin-top:15px;
+      color:#666;
+      font-size:15px;
+    }
+
+    .hp i{
+      color:#ff4d4d;
+      margin-right:8px;
+    }
+
+    .card-actions{
+      display:flex;
+      gap:12px;
+      margin-top:25px;
+    }
+
+    .edit-btn,
+    .delete-btn{
+      flex:1;
+      border:none;
+      padding:12px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:600;
+      transition:0.3s;
+    }
+
+    .edit-btn{
+      background:#eef2ff;
+      color:#3b82f6;
+    }
+
+    .delete-btn{
+      background:#ffe5e5;
+      color:#ef4444;
+    }
+
+    .edit-btn:hover,
+    .delete-btn:hover{
+      transform:scale(1.03);
+    }
+
+    /* MODAL */
+    .modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.5);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:200;
+    }
+
+    .modal-content{
+      width:420px;
+      background:#fff;
+      border-radius:24px;
+      overflow:hidden;
+      animation:popup 0.3s ease;
+    }
+
+    @keyframes popup{
+      from{ transform:scale(0.8); opacity:0; }
+      to{ transform:scale(1); opacity:1; }
+    }
+
+    .modal-header{
+      background:#e60023;
+      color:#fff;
+      padding:22px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .close{ cursor:pointer; font-size:24px; }
+    .modal-body{ padding:25px; }
+    .input-group{ margin-bottom:20px; }
+
+    .input-group label{
+      display:block;
+      margin-bottom:8px;
+      font-weight:600;
+    }
+
+    .input-group input,
+    .input-group select,
+    .input-group textarea{
+      width:100%;
+      padding:14px;
+      border:2px solid #e5e7eb;
+      border-radius:14px;
+      outline:none;
+      font-size:15px;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus,
+    .input-group textarea:focus{
+      border-color:#ff2e2e;
+    }
+
+    .modal-actions{
+      display:flex;
+      gap:12px;
+      margin-top:10px;
+    }
+
+    .cancel-btn,
+    .save-btn{
+      flex:1;
+      border:none;
+      padding:14px;
+      border-radius:14px;
+      font-weight:600;
+      cursor:pointer;
+    }
+
+    .cancel-btn{ background:#f3f4f6; }
+    .save-btn{ background:#e60023; color:#fff; }
+
+    @media(max-width:768px){
+      .navbar{
+        padding:20px;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .logo{ justify-content: center; }
+      .search-container { margin: 10px 0; max-width: 100%; }
+      .filter-container { margin-bottom: 10px; max-width: 100%; }
+      .add-btn { width: 100%; }
+      .modal-content{ width:90%; }
+    }
+    /* ENTRY NOTIFICATION */
+#entryNotification {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-30px);
+  z-index: 500;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+  padding: 20px 30px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  max-width: 500px;
+  width: 90%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+#entryNotification.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+.notif-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #fff3f3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #e60023;
+  flex-shrink: 0;
+}
+.notif-body { flex: 1; }
+.notif-title { font-size: 15px; font-weight: 700; color: #1f2937; margin-bottom: 4px; }
+.notif-text { font-size: 13px; color: #6b7280; line-height: 1.5; }
+.notif-close {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  flex-shrink: 0;
+  padding: 0;
+}
+.notif-close:hover { color: #e60023; }
+.notif-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ff2e2e, #e60023);
+  border-radius: 0 0 20px 20px;
+  width: 100%;
+  animation: shrink 5s linear forwards;
+}
+@keyframes shrink { from { width: 100%; } to { width: 0%; } }
+
+    /*HTML*/
+  </style>
+</head>
+
+<body>
+
+  <div class="welcome-view" id="welcomeView">
+    <div class="welcome-bg-icon">
+      <i class="fa-solid fa-circle-dot"></i>
+    </div>
+    <div class="welcome-content">
+      <i class="fa-solid fa-circle-dot main-poke-icon"></i>
+      <h1 class="welcome-title">WELCOME TRAINER</h1>
+      <p class="welcome-subtitle">Manage, analyze, and customize your collection with the ultimate real-time database dashboard tool.</p>
+      <button class="enter-btn" onclick="enterDashboard()">
+        Enter Dashboard <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="navbar">
+    <div class="logo">
+      <div class="logo-link-home" onclick="showWelcomePage()" title="Go back to welcome page">
+        <i class="fa-solid fa-circle-dot"></i>
+        <div class="logo-text">
+          <span class="logo-main">POKEDEX</span>
+          <span class="logo-sub">The Ultimate Pokémon Dashboard</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="search-container">
+      <input type="text" id="searchFilter" placeholder="Search by name..." oninput="renderGrid()">
+      <i class="fa-solid fa-magnifying-glass"></i>
+    </div>
+
+    <div class="filter-container">
+      <select id="typeFilter" onchange="renderGrid()">
+        <option value="All">All Types</option>
+        <option value="Electric">Electric</option>
+        <option value="Water">Water</option>
+        <option value="Fire">Fire</option>
+        <option value="Grass">Grass</option>
+      </select>
+    </div>
+
+    <button class="add-btn" onclick="openModal()">
+      <i class="fa-solid fa-plus"></i> Add Pokémon
+    </button>
+  </div>
+
+  <div class="container">
+    <div class="stats">
+      <div class="stat-card">
+        <div class="icon-box blue">
+          <i class="fa-solid fa-dragon"></i>
+        </div>
+        <div class="stat-text">
+          <p>Total Pokémon</p>
+          <h2 id="totalPokemon">0</h2>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon-box yellow">
+          <i class="fa-solid fa-bolt"></i>
+        </div>
+        <div class="stat-text">
+          <p>Electric Pokémon</p>
+          <h2 id="totalElectric">0</h2>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon-box cyan">
+          <i class="fa-solid fa-droplet"></i>
+        </div>
+        <div class="stat-text">
+          <p>Water Pokémon</p>
+          <h2 id="totalWater">0</h2>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon-box red">
+          <i class="fa-solid fa-fire"></i>
+        </div>
+        <div class="stat-text">
+          <p>Fire Pokémon</p>
+          <h2 id="totalFire">0</h2>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon-box green">
+          <i class="fa-solid fa-leaf"></i>
+        </div>
+        <div class="stat-text">
+          <p>Grass Pokémon</p>
+          <h2 id="totalGrass">0</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="pokemon-grid" id="pokemonGrid"></div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add New Pokémon</h2>
+        <span class="close" onclick="closeModal()">&times;</span>
+      </div>
+
+      <div class="modal-body">
+        <div class="input-group">
+          <label>Name</label>
+          <input type="text" id="name" placeholder="e.g Pikachu">
+        </div>
+
+        <div class="input-group">
+          <label>Type</label>
+          <select id="type">
+            <option>Electric</option>
+            <option>Water</option>
+            <option>Fire</option>
+            <option>Grass</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Height</label>
+          <input type="text" id="height" placeholder="e.g 0.4 m">
+        </div>
+
+        <div class="input-group">
+          <label>Weight</label>
+          <input type="text" id="weight" placeholder="e.g 6.0 kg">
+        </div>
+
+        <div class="input-group">
+          <label>Description</label>
+          <textarea id="description" rows="3" placeholder="e.g When it hits with electroshock powers..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+          <button class="save-btn" onclick="addPokemon()">Save Pokémon</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+<!-- ENTRY NOTIFICATION -->
+<div id="entryNotification">
+  <div class="notif-icon"><i class="fa-solid fa-circle-info"></i></div>
+  <div class="notif-body">
+    <div class="notif-title">👋 Welcome to the Pokédex Dashboard!</div>
+    <div class="notif-text">
+      A <span style="color:#22c55e;font-weight:600;">valid name</span> will show a real-time picture — an
+      <span style="color:#ef4444;font-weight:600;">invalid name</span> will show what you typed.
+    </div>
+  </div>
+  <button class="notif-close" onclick="dismissNotif()"><i class="fa-solid fa-xmark"></i></button>
+  <div class="notif-progress" id="notifProgress"></div>
+</div>
+
+  <script>
+    const modal = document.getElementById("modal");
+    const pokemonGrid = document.getElementById("pokemonGrid");
+    const welcomeView = document.getElementById("welcomeView");
+    
+    // API Configurations pointing directly to your Spring Boot Controller
+    const API_URL = "http://localhost:8080/pokemons";
+    let pokemonArray = []; 
+    let currentEditId = null;
+
+    // NOTIFICATION
+const entryNotif = document.getElementById("entryNotification");
+let notifTimer = null;
+
+function showEntryNotification() {
+  entryNotif.classList.add("show");
+  const bar = document.getElementById("notifProgress");
+  bar.style.animation = "none";
+  bar.offsetHeight;
+  bar.style.animation = "shrink 12s linear forwards";
+  clearTimeout(notifTimer);
+  notifTimer = setTimeout(dismissNotif, 12000);
+}
+
+function dismissNotif() {
+  entryNotif.classList.remove("show");
+}
+
+    // View Routing Functions
+    function enterDashboard() {
+      welcomeView.classList.add("hidden");
+      showEntryNotification();
+    }
+
+    function showWelcomePage() {
+      welcomeView.classList.remove("hidden");
+    }
+
+    function openModal(){
+      document.getElementById("modalTitle").innerText = "Add New Pokémon";
+      document.querySelector(".save-btn").innerText = "Save Pokémon";
+      currentEditId = null;
+      modal.style.display = "flex";
+    }
+
+    function closeModal(){
+      modal.style.display = "none";
+      document.getElementById("name").value = "";
+      document.getElementById("height").value = "";
+      document.getElementById("weight").value = "";
+      document.getElementById("description").value = "";
+    }
+
+    // Load data from backend database via Spring Boot GET mapping
+    function loadPokemonData() {
+      fetch(API_URL)
+        .then(response => response.json())
+        .then(data => {
+          pokemonArray = data;
+          renderGrid();
+        })
+        .catch(error => console.error("Error fetching data from server:", error));
+    }
+
+    function editPokemon(id) {
+      currentEditId = id;
+      const pokemon = pokemonArray.find(p => p.id === id);
+
+      document.getElementById("name").value = pokemon.name;
+      document.getElementById("type").value = pokemon.type;
+      document.getElementById("height").value = pokemon.height || "";
+      document.getElementById("weight").value = pokemon.weight || "";
+      document.getElementById("description").value = pokemon.description || "";
+
+      document.getElementById("modalTitle").innerText = `Edit Pokémon (#${id})`;
+      document.querySelector(".save-btn").innerText = "Update Pokémon";
+      
+      modal.style.display = "flex";
+    }
+
+    function deletePokemon(id){
+      fetch(`${API_URL}/${id}`, {
+        method: "DELETE"
+      })
+      .then(response => {
+        if(response.ok) {
+          loadPokemonData();
+        } else {
+          alert("Failed to delete the Pokémon record.");
+        }
+      })
+      .catch(error => console.error("Error deleting item:", error));
+    }
+
+    function addPokemon(){
+      const name = document.getElementById("name").value.trim();
+      const type = document.getElementById("type").value;
+      const height = document.getElementById("height").value.trim();
+      const weight = document.getElementById("weight").value.trim();
+      const description = document.getElementById("description").value.trim();
+
+      if(name === "" || height === "" || weight === ""){
+        alert("Please fill all fields accurately.");
+        return;
+      }
+
+      const pokemonData = { name, type, height, weight, description };
+
+      if (currentEditId !== null) {
+        fetch(`${API_URL}/${currentEditId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(pokemonData)
+        })
+        .then(response => {
+          if(response.ok) {
+            loadPokemonData();
+            closeModal();
+          }
+        });
+      } else {
+        fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(pokemonData)
+        })
+        .then(response => {
+          if(response.ok) {
+            loadPokemonData();
+            closeModal();
+          }
+        });
+      }
+    }
+
+    function getTypeDetails(type) {
+      switch(type) {
+        case "Water": return { class: "water", emoji: "💧" };
+        case "Fire":  return { class: "fire",  emoji: "🔥" };
+        case "Grass": return { class: "grass", emoji: "🌿" };
+        default:      return { class: "electric", emoji: "⚡" };
+      }
+    }
+
+    function renderGrid(){
+      pokemonGrid.innerHTML = "";
+      
+      let electricCount = 0;
+      let waterCount = 0;
+      let fireCount = 0;
+      let grassCount = 0;
+
+      const searchQuery = document.getElementById("searchFilter") ? document.getElementById("searchFilter").value.toLowerCase().trim() : "";
+      const selectedType = document.getElementById("typeFilter") ? document.getElementById("typeFilter").value : "All";
+
+      pokemonArray.forEach((pokemon) => {
+        if (pokemon.type === "Electric") electricCount++;
+        if (pokemon.type === "Water") waterCount++;
+        if (pokemon.type === "Fire") fireCount++;
+        if (pokemon.type === "Grass") grassCount++;
+
+        const matchesSearch = pokemon.name.toLowerCase().includes(searchQuery);
+        const matchesType = (selectedType === "All") || (pokemon.type === selectedType);
+        
+        if (!matchesSearch || !matchesType) return; 
+
+        const { class: typeClass, emoji } = getTypeDetails(pokemon.type);
+        const standardizedName = pokemon.name.toLowerCase().trim();
+        const spriteUrl = `https://img.pokemondb.net/sprites/home/normal/${standardizedName}.png`;
+
+        const card = `
+          <div class="pokemon-card">
+            <div class="card-top ${typeClass}" style="padding: 10px; overflow: hidden;">
+              <img src="${spriteUrl}" 
+                   alt="${pokemon.name}" 
+                   style="max-width: 140px; max-height: 140px; object-fit: contain; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.15));"
+                   onerror="this.onerror=null; this.parentElement.innerHTML='${emoji}';">
+            </div>
+            <div class="card-body">
+              <span class="id-badge">#${pokemon.id}</span>
+              <div class="pokemon-header">
+                <div class="pokemon-name">${pokemon.name}</div>
+                <div class="type-badge">${pokemon.type}</div>
+              </div>
+              <div class="hp" style="font-size: 13px; line-height: 1.5;">
+                <div><strong>H:</strong> ${pokemon.height || 'N/A'} | <strong>W:</strong> ${pokemon.weight || 'N/A'}</div>
+                <div style="margin-top: 5px; color: #777; font-style: italic;">${pokemon.description || 'No description available.'}</div>
+              </div>
+              <div class="card-actions">
+                <button class="edit-btn" onclick="editPokemon(${pokemon.id})">
+                  <i class="fa-solid fa-pen"></i> Edit
+                </button>
+                <button class="delete-btn" onclick="deletePokemon(${pokemon.id})">
+                  <i class="fa-solid fa-trash"></i> Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        pokemonGrid.innerHTML += card;
+      });
+
+      document.getElementById("totalPokemon").innerText = pokemonArray.length;
+      document.getElementById("totalElectric").innerText = electricCount;
+      document.getElementById("totalWater").innerText = waterCount;
+      document.getElementById("totalFire").innerText = fireCount;
+      document.getElementById("totalGrass").innerText = grassCount;
+    }
+    
+    // Initialize data pull from Spring Boot backend
+    loadPokemonData();
+  </script>
+
+</body>
+</html>

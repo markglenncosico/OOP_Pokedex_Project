@@ -1,0 +1,4 @@
+pokedex\poke\pokemonko\FinalApplication.class
+pokedex\poke\pokemonko\controller\PokemonController.class
+pokedex\poke\pokemonko\repository\PokemonRepository.class
+pokedex\poke\pokemonko\model\Pokemon.class
